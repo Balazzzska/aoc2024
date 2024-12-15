@@ -102,7 +102,7 @@ velocities = np.array(velocities)
 # part2
 x_variances = []
 y_variances = []
-for sim in range(10000):
+for sim in range(100):
     positions = positions + velocities
     positions = positions % MAP_SIZE
 
@@ -111,7 +111,8 @@ for sim in range(10000):
     x_variances.append(xvariance)
     y_variances.append(yvariance)
 
-    if xvariance < 600 or yvariance < 600:
+    #if xvariance < 600 or yvariance < 600:
+    if True:
         bw_image = np.zeros((MAP_SIZE[1], MAP_SIZE[0]), dtype=np.uint8)
         for p in positions:
             x, y = p
