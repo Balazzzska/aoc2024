@@ -16,7 +16,6 @@ input_str = inputlines[0]
 
 print(input_str)
 
-# reverse
 denseformat = [int(x) for x in input_str]
 
 print(denseformat)
