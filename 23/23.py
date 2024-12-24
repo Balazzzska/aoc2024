@@ -45,17 +45,28 @@ print(f"part1: {len(triplets)}")  # 1119
 
 largest = set()
 
+# maximal, partial, exluded (R, P, X)
 queue = [(set(), set(conn.keys()), set())]
 while queue:
+    # R, P, X
     maximal, partial, exluded = queue.pop()
+
+    # if P and X are both empty then
     if len(partial) == len(exluded) == 0:
         if len(maximal) > len(largest):
+            # report R as a maximal clique
             largest = maximal
             continue
 
+    # for each vertex v in P do...
     for node in list(partial):
+        # BronKerbosch1(R ⋃ {v}, P ⋂ N(v), X ⋂ N(v))
         queue.append((maximal | {node}, partial & conn[node], exluded & conn[node]))
+
+        # P := P \ {v}
         partial = partial - {node}
+
+        # X := X ⋃ {v}
         exluded = exluded | {node}
 
 print(largest)
