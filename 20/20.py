@@ -44,58 +44,62 @@ def get_next_positions(pos):
 
 print(start, end)
 
+
+##########################################
 # A star algorithm
+def a_star(start, end):
+    path = []
+    open_list = []
+    closed_list = set()
+    parents = {}  # to reconstruct the path
+    # (f, pos, g)
+    heappush(open_list, (0, start, 0))
+
+    while open_list:
+        f, pos, g = heappop(open_list)
+        closed_list.add(pos)
+
+        if pos == end:
+            # reconstruct the path
+            path = []
+            while pos != start:
+                path.append(pos)
+                pos = parents[pos]
+            path.append(start)
+            path.reverse()
+
+            return path
+
+        next_positions = get_next_positions(pos)
+        for next_pos in next_positions:
+            if next_pos in walls:
+                continue
+
+            if next_pos in closed_list:
+                continue
+
+            new_g = g + 1
+            new_f = new_g + abs(next_pos[0] - end[0]) + abs(next_pos[1] - end[1])
+
+            parents[next_pos] = pos
+            heappush(open_list, (new_f, next_pos, new_g))
+
+    return None
 
 
-open_list = []
-closed_list = set()
-parents = {}  # to reconstruct the path
+path = a_star(start, end)
 
-
-# (f, pos, g)
-heappush(open_list, (0, start, 0))
-
-while open_list:
-    f, pos, g = heappop(open_list)
-    closed_list.add(pos)
-
-    if pos == end:
-        print(f"Found end: {g}")
-
-        # reconstruct the path
-        path = []
-        while pos != start:
-            path.append(pos)
-            pos = parents[pos]
-        path.append(start)
-        path.reverse()
-
-        break
-
-    next_positions = get_next_positions(pos)
-    for next_pos in next_positions:
-        if next_pos in walls:
-            continue
-        if next_pos in closed_list:
-            continue
-
-        new_g = g + 1
-        new_f = new_g + abs(next_pos[0] - end[0]) + abs(next_pos[1] - end[1])
-
-        parents[next_pos] = pos
-        heappush(open_list, (new_f, next_pos, new_g))
-
-print(path)
-
-for y in range(MAP_SIZE[1]):
-    for x in range(MAP_SIZE[0]):
-        if (x, y) in path:
-            print(".", end="")
-        elif (x, y) in walls:
-            print("#", end="")
-        else:
-            print(" ", end="")
-    print()
+assert len(path) + len(walls) == MAP_SIZE[0] * MAP_SIZE[1]
+if False:
+    for y in range(MAP_SIZE[1]):
+        for x in range(MAP_SIZE[0]):
+            if (x, y) in path:
+                print(".", end="")
+            elif (x, y) in walls:
+                print("#", end="")
+            else:
+                raise Exception("???")
+        print()
 
 cnt_ = {}
 for idx, (x, y) in enumerate(path):
@@ -123,3 +127,67 @@ for k in sorted(cnt_.keys()):
         at_least_100 += cnt_[k]
 
 print(at_least_100)  # 1404
+
+
+# part2
+DEPTH = 20
+
+assert len(path) == len(set(path))
+
+if False:
+    asd1 = (3, 12)
+    asd2 = (2, 9)
+    asd = a_star(asd1, asd2, through_walls=True)
+
+    for y in range(MAP_SIZE[1]):
+        for x in range(MAP_SIZE[0]):
+            if (x, y) in asd:
+                print("!", end="")
+            else:
+                if (x, y) in path:
+                    print(" ", end="")
+                elif (x, y) in walls:
+                    print("#", end="")
+                else:
+                    raise Exception("???")
+        print()
+
+
+cnt_ = {}
+for idx, (x, y) in enumerate(path):
+    print(f"checking {idx}/{len(path)}")
+    for idx2, (x2, y2) in enumerate(path):
+        if idx + 2 > idx2:
+            continue
+
+        distance_through_wall = abs(x - x2) + abs(y - y2)
+        if distance_through_wall > DEPTH:
+            continue
+
+        distance_through_path = idx2 - idx
+
+        saved = distance_through_path - distance_through_wall
+        if saved <= 0:
+            # we saved nothing, or on the contrary, we lost some steps
+            continue
+
+        if saved not in cnt_:
+            cnt_[saved] = 0
+
+        cnt_[saved] += 1
+
+print("===")
+at_least_50 = 0
+at_least_100 = 0
+for k in sorted(cnt_.keys()):
+    # print(cnt_[k], k)
+    print(f"There are {cnt_[k]} cheats that save {k} steps")
+    if k >= 100:
+        at_least_100 += cnt_[k]
+    if k >= 50:
+        at_least_50 += cnt_[k]
+
+print(at_least_50)  # 1231862
+print(at_least_100)  # 1010981 this is the right answer
+
+print("DONE")
